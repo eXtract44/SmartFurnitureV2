@@ -1,3 +1,4 @@
+#include <fonts.h>
 
 uint8_t uartPixelArray[LED_DISPLAY_LENGTH + 1][LED_DISPLAY_HEIGHT + 1];
 
@@ -298,4 +299,67 @@ void cleanNumber(const uint8_t number, const uint8_t x, const uint8_t y) {
 
 void setNumber(const uint8_t number, const uint8_t x, const uint8_t y) {
   printNumber(number, x, y, UART_PIXEL_ON);
+}
+void drawPixel(int x, int y, uint32_t color) {
+  setUartPixel(x, y);
+}
+void drawChar3x5(char c, int x, int y, uint32_t color) {
+  if (c >= 'A' && c <= 'Z') {
+    uint8_t *bitmap = font3x5[c - 'A'];
+    for (int row = 0; row < 5; row++) {
+      for (int col = 0; col < 3; col++) {
+        if (bitmap[row] & (1 << (2 - col))) {
+          drawPixel(x + col, y + row, color);
+        }
+      }
+    }
+  } else if (c >= '0' && c <= '9') {
+    uint8_t *bitmap = font3x5[c - '0' + 26];
+    for (int row = 0; row < 5; row++) {
+      for (int col = 0; col < 3; col++) {
+        if (bitmap[row] & (1 << (2 - col))) {
+          drawPixel(x + col, y + row, color);
+        }
+      }
+    }
+  }
+  else if (c == '%') {
+    *  *
+      * 
+          drawPixel(x , y , color);   
+          drawPixel(x+3 , y , color); 
+
+          drawPixel(x +2, y+1 , color);
+
+          drawPixel(x +1, y+2 , color);
+          drawPixel(x+3 , y+4 , color); 
+
+  }
+}
+
+void drawChar1x5(char c, int x, int y, uint32_t color) {
+  if (c == ' ') {
+  } else if (c == ':') {
+    drawPixel(x, y + 1, color);
+    drawPixel(x, y + 3, color);
+  } else if (c == '.') {
+    drawPixel(x, y+4, color);
+  } else if (c == '*') {
+    drawPixel(x, y, color);
+  }
+}
+
+void displayText3x5(const char *text, int startX, int startY, uint32_t color) {
+  int x = startX;
+  while (*text) {
+    if (*text != '*' && *text != '.' && *text != ':' && *text != ' ') {
+      drawChar3x5(*text, x, startY, color);
+      x += 4;  // Abstand zwischen den Zeichen
+    } else {
+      drawChar1x5(*text, x, startY, color);
+      x += 1;  // Abstand zwischen den Zeichen
+    }
+
+    text++;
+  }
 }
