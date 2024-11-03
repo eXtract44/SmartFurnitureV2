@@ -108,45 +108,39 @@ void setChar3x5(char c, int x, int y) {
     setPixel(x, y);
   }
 }
-
+int getXCharOffset(const char c) {
+  int ret = 0;
+  switch (c) {
+    case ' ':
+      ret = 1;
+      break;
+    case '.':
+      ret = 1;
+      break;
+    case ':':
+      ret = 1;
+      break;
+    case '*':
+      ret = 1;
+      break;
+  }
+  return ret;
+}
 void setText3x5(const char *text, int startX, int startY) {
   int x = startX;
-
-  int line4 = 0;
-  int line5 = 0;
   while (*text) {
-    char prev_char = *text;
-    if (*text == '*' || *text == ' ') {
+    if (*text == ' ' || *text == '.' || *text == ':' || *text == '*') {
       setChar3x5(*text, x, startY);
-      x += 1;  // Abstand zwischen den Zeichen
-    } else if (*text == '1') {
+      x += 1;  // Abstand zwischen den Zeiche
+    } else {
       setChar3x5(*text, x, startY);
-      x += 2;  // Abstand zwischen den Zeichen
-    } else if (*text == ':') {
-      setChar3x5(*text, x - 1, startY);
-    } else if (*text == '.') {
-      setChar3x5(*text, x - 1, startY);
-    } else if (startY == LED_DISPLAY_LINE_4){ 
-        line4++;
-        setChar3x5(*text, x, startY);
-        if (line4 == 1)
-          x += 4;  // Abstand zwischen den Zeichen
-        else
-          x += 4;  // Abstand zwischen den Zeichen
-    } /*else if (startY == LED_DISPLAY_LINE_5){ 
-        line5++;
-        setChar3x5(*text, x, startY);
-        if (line5 == 2)
-          x += 3;  // Abstand zwischen den Zeichen
-        else
-          x += 4;  // Abstand zwischen den Zeichen
-    }*/else {
-      setChar3x5(*text, x, startY);
-      x += 4;  // Abstand zwischen den Zeichen
+      if (*text == '1') {
+        x += 2;  // Abstand zwischen den Zeiche
+      } else {
+        x += 4;  // Abstand zwischen den Zeiche
+      }
     }
 
     text++;
   }
-  line4 = 0;
-  line5 = 0;
 }
