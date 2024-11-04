@@ -22,6 +22,18 @@ void drawAll(byte red, byte green, byte blue) {
 void drawLedAllPixelOFF() {
   setAll(0, 0, 0);
 }
+void drawHomeMode(){
+
+}
+void drawWeatherMode(){
+
+}
+void drawTimeMode(){
+  
+}
+void drawNightTimeMode(){
+  
+}
 
 
 

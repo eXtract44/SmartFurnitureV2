@@ -108,24 +108,7 @@ void setChar3x5(char c, int x, int y) {
     setPixel(x, y);
   }
 }
-int getXCharOffset(const char c) {
-  int ret = 0;
-  switch (c) {
-    case ' ':
-      ret = 1;
-      break;
-    case '.':
-      ret = 1;
-      break;
-    case ':':
-      ret = 1;
-      break;
-    case '*':
-      ret = 1;
-      break;
-  }
-  return ret;
-}
+
 void setText3x5(const char *text, int startX, int startY) {
   int x = startX;
   while (*text) {
@@ -141,6 +124,54 @@ void setText3x5(const char *text, int startX, int startY) {
       }
     }
 
+    text++;
+  }
+}
+void setTemp(const char *text, int startX, int startY) {
+  setText3x5(text, startX, startY);
+}
+
+void setTime(const char *text, int startX, int startY) {
+  int x = startX;
+  int currentChar = 0;
+  while (*text) {
+    currentChar++;
+    if (*text == '1') {
+      setChar3x5(*text, x, startY);
+      x += 2;  // Abstand zwischen den Zeiche
+    } else if (*text == '2' && currentChar == 1) {
+      setChar3x5(*text, x, startY);
+      x += 3;
+    } else if (*text == ':') {
+      setChar3x5(*text, x - 1, startY);
+    } else {
+      setChar3x5(*text, x, startY);
+      x += 4;  // Abstand zwischen den Zeiche
+    }
+    text++;
+  }
+}
+
+void setDate(const char *text, int startX, int startY) {
+int x = startX;
+  int currentChar = 0;
+  while (*text) {
+    currentChar++;
+    if (currentChar == 1) {
+      setChar3x5(*text, x, startY);
+      x += 4;  // Abstand zwischen den Zeiche
+    } else if (currentChar == 2) {
+      setChar3x5(*text, x, startY);
+      x += 4;  // Abstand zwischen den Zeiche
+    } else if (currentChar == 3) {
+      setChar3x5(*text, x - 1, startY);
+    } else if (currentChar == 4) {
+      setChar3x5(*text, x, startY);
+      x += 2;  // Abstand zwischen den Zeiche
+    } else if (currentChar == 5) {
+      setChar3x5(*text, x, startY);
+      x += 4;  // Abstand zwischen den Zeiche
+    }
     text++;
   }
 }
