@@ -115,7 +115,7 @@ void setText3x5(const char *text, int startX, int startY) {
     if (*text == ' ' || *text == '.' || *text == ':' || *text == '*') {
       setChar3x5(*text, x, startY);
       x += 1;  // Abstand zwischen den Zeiche
-    } else {
+    } else{
       setChar3x5(*text, x, startY);
       if (*text == '1') {
         x += 2;  // Abstand zwischen den Zeiche
