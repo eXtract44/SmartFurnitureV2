@@ -310,8 +310,8 @@ void drawNumber4x9(int number, int startX, int startY, uint8_t r, uint8_t g, uin
         int pixelY = startY + row;
 
         // Check if the pixel is within the matrix boundaries
-        if (pixelX >= 0 && pixelX < matrixWidth && pixelY >= 0 && pixelY < matrixHeight) {
-          int pixelIndex = pixelY * matrixWidth + pixelX;
+        if (pixelX >= 0 && pixelX < LED_DISPLAY_LENGTH && pixelY >= 0 && pixelY < LED_DISPLAY_HEIGHT) {
+          int pixelIndex = pixelY * LED_DISPLAY_LENGTH + pixelX;
           strip.setPixelColor(pixelIndex, strip.Color(r, g, b));
         }
       }
