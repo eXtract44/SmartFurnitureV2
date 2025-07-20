@@ -1,33 +1,7 @@
-
-#include <config_.h>
+#include <Wire.h>
+#include "Adafruit_SGP30.h"
 
 Adafruit_SGP30 sgp_30;
-Adafruit_AHT10 aht;  
-sensors_event_t aht_10_humidity, aht_10_temperature;
-///////////////////////////////////////////////////////
-void ini_aht() {
-  Wire1.begin(SDA_PIN_AHT10, SCL_PIN_AHT10);
-  if (!aht.begin(&Wire1)) {
-    Serial.println("Could not find AHT10? Check wiring");
-    while (1) delay(10);
-  }
-  Serial.println("AHT10 found");
-}
-void read_aht() {
-  aht.getEvent(&aht_10_humidity, &aht_10_temperature);  // populate temp and humidity objects with fresh data
-}
-float get_temperature_aht(){
- return static_cast<float>(aht_10_temperature.temperature);
-}
-uint8_t get_humidity_aht(){
-  return static_cast<uint8_t>(aht_10_humidity.relative_humidity);
-}
-void debug_uart_aht(){
-  Serial.print("Temperature: "); Serial.print(aht_10_temperature.temperature); Serial.println(" degrees C");
-  Serial.print("Humidity: "); Serial.print(aht_10_humidity.relative_humidity); Serial.println("% rH");
-}
-//////////////////////////////////////////////////////////////
-
 
 void ini_sgp() {
   Wire.begin();
@@ -98,27 +72,4 @@ void debug_uart_sgp() {
     Serial.print(" & TVOC: 0x");
     Serial.println(TVOC_base, HEX);
   //}
-}
-////////////////////////////////////////////////////////////////////////
-uint16_t brightness = 0;
-void read_brightness() {
-  static uint16_t cnt = 0;
-  cnt++;
-  if(cnt > 60){
-  cnt= 0; 
-  brightness = map(analogRead(LIGHT_SENSOR_PIN), 0, 4095, 1, 40); 
-
-  strip.setBrightness(brightness);
-  strip.show();
-  }
-}
-void set_brightness_1() {
-  strip.setBrightness(1);
-}
-void debug_temt6000(){
-    Serial.print("analogRead(A0) = ");
-  Serial.print(analogRead(A0));
-  Serial.println(" bit");
-  Serial.print("brightness in % = ");
-  Serial.println(brightness);
 }

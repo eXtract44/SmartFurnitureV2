@@ -1,8 +1,9 @@
 /*  
+Arduino 1.8.18 version
 Board information:
 ESP32 WROOM
 
-librarie
+Library neoPixel 1,2,0
 
 https://dl.espressif.com/dl/package_esp32_index.json
 
