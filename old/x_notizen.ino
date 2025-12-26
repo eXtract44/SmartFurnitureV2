@@ -1,5 +1,4 @@
 /*  
-Arduino 1.8.18 version
 Board information:
 ESP32 WROOM
 

@@ -4,8 +4,6 @@
 #define strip_len 14                     //14
 #define strip_high 41                    //41
 #define COUNT_LED strip_len* strip_high  //574
-#define speed_step_light 250//30  //0-255 Light speed_step animation numbers
-#define delay_light 2//30       //mS Light delay animation numbers
 
 int pixelFormat = NEO_GRB + NEO_KHZ800;
 Adafruit_NeoPixel strip(COUNT_LED, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -19,84 +17,83 @@ void ini_ws2812b() {
   strip.setBrightness(1);  // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 
+
+#define speed_step_light 250//30  //0-255 Light speed_step animation numbers
+#define delay_light 2//30       //mS Light delay animation numbers
+
 void setAll(byte red, byte green, byte blue) {
   for (int i = 0; i < COUNT_LED; i++) {
     strip.setPixelColor(COUNT_LED, strip.Color(red, green, blue));
   }
   strip.show();
 }
-void log_invalid_pixel_coords(const uint8_t x, const uint8_t y) {
-  Serial.print("Invalid pixel coordinates: x=");
-  Serial.print(x);
-  Serial.print(", y=");
-  Serial.println(y);
+void draw_error_pixel() {
+  draw_char('c', 1, 1, 255, 255, 255);
+  draw_char('h', 1, 7, 255, 255, 255);
+  draw_char('e', 1, 13, 255, 255, 255);
+  draw_char('c', 1, 19, 255, 255, 255);
+  draw_char('k', 1, 25, 255, 255, 255);
 }
 void draw_pixel_raw(const uint8_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
-  if (y >= strip_high || x >= strip_len) {
-    log_invalid_pixel_coords(x,y);
+  uint16_t y_temp = y;
+  uint16_t x_temp = x;
+  if (y_temp > strip_high) {
+    draw_error_pixel();
     return;
+    y_temp = strip_high;
   }
-
-  uint16_t index;
-  bool is_odd_row = y % 2;
-
-  if (is_odd_row) {
-    index = y * strip_len + x;
-  } else {
-    index = y * strip_len + (strip_len - 1 - x);
+  if (x > strip_len) {
+    draw_error_pixel();
+    return;
+    x_temp = strip_len;
   }
-
-  strip.setPixelColor(index, strip.Color(r, g, b));
+  y_temp = y_temp % 2;  // 0 or 1
+  if (y_temp == 0) {
+    x_temp = strip_len * y - x_temp;  //y == 4
+  }
+  if (y_temp == 1) {
+    x_temp = x_temp + strip_len * (y - 1) - 1;  //y == 5
+  }
+  strip.setPixelColor(x_temp, strip.Color(r, g, b));
 }
-void draw_pixel_immediate(const uint8_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
+void draw_pixel_now(const uint8_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
   draw_pixel_raw(x, y, r, g, b);
   strip.show();
 }
-void draw_pixel_white(const uint8_t x, const uint8_t y) {
+void draw_pixel_fast(const uint8_t x, const uint8_t y) {
   draw_pixel_raw(x, y, 255, 255, 255);
   strip.show();
 }
-
-void fade_in_white_pixel(const uint8_t x, const uint8_t y, const uint8_t step) {
-  if (step == 0) return; // защита от бесконечного цикла
-
-  for (uint16_t rgb = 0; rgb <= 255; rgb += step) {
+void draw_pixel_slow_white(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
+  for (uint16_t rgb = 0; rgb < 255; rgb += speed_step) {
     draw_pixel_raw(x, y, rgb, rgb, rgb);
     strip.show();
   }
 }
-
-void fade_in_red_pixel(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
-  if (step == 0) return; // защита от бесконечного цикла
+void draw_pixel_slow_red(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
   for (uint16_t r = 0; r < 255; r += speed_step) {
     draw_pixel_raw(x, y, r, 0, 0);
     strip.show();
   }
 }
-void fade_in_yellow_pixel(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
-  if (step == 0) return; // защита от бесконечного цикла
+void draw_pixel_slow_yellow(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
   for (uint16_t rg = 0; rg < 255; rg += speed_step) {
     draw_pixel_raw(x, y, rg, rg, 0);
     strip.show();
   }
 }
-void fade_in_green_pixel(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
-  if (step == 0) return; // защита от бесконечного цикла
+void draw_pixel_slow_green(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
   for (uint16_t g = 0; g < 255; g += speed_step) {
     draw_pixel_raw(x, y, 0, g, 0);
     strip.show();
   }
 }
-
-void fade_out_pixel(const uint8_t x, const uint8_t y, const uint8_t step) {
-  if (step == 0) return;
-
-  for (int rgb = 255; rgb >= 0; rgb -= step) {
+void clear_pixel_slow(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
+  for (uint16_t rgb = 255; rgb <= 10; rgb -= speed_step) {
     draw_pixel_raw(x, y, rgb, rgb, rgb);
     strip.show();
   }
 }
-
 void clear_number_fast(const uint8_t x, const uint8_t y) {
   for (uint8_t i = 0; i <= 2; i++) {
     for (uint8_t j = 0; j <= 4; j++) {
@@ -113,128 +110,564 @@ void fill_number_fast(const uint8_t x, const uint8_t y, byte r, byte g, byte b) 
   }
   strip.show();
 }
-
-struct PixelPos {
-  uint8_t x_offset;
-  uint8_t y_offset;
-};
-
-void fade_in_sequence_fast(const uint8_t base_x, const uint8_t base_y, const PixelPos* positions, size_t count, uint8_t speed_step, uint16_t delay_ms) {
-  for (size_t i = 0; i < count; i++) {
-    fade_in_white_pixel(base_x + positions[i].x_offset, base_y + positions[i].y_offset, speed_step);
-  }
-}
-
-void fade_in_sequence_slow(const uint8_t base_x, const uint8_t base_y, const PixelPos* positions, size_t count, uint8_t speed_step, uint16_t delay_ms) {
-  for (size_t i = 0; i < count; i++) {
-    fade_in_white_pixel(base_x + positions[i].x_offset, base_y + positions[i].y_offset, speed_step);
-    delay(delay_ms);
-  }
-}
-
 void draw_number_slow(const uint8_t number, const uint8_t x, const uint8_t y) {
   clear_number_fast(x, y);
-
-  // Координаты для каждой цифры (пример для 0–9)
-  static const PixelPos digits[][20] = {
-    // 0
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,4},
-      {0,0},{0,1},{0,2},{0,3},{0,4} },
-    // 1
-    { {1,0},{1,1},{1,2},{1,3},{1,4} },
-    // 2
-    { {2,0},{2,1},{2,2},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,2},{0,3},{0,4} },
-    // 3
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,2},{0,4} },
-    // 4
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,2},
-      {0,0},{0,1},{0,2} },
-    // 5
-    { {2,0},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,4} },
-    // 6
-    { {2,0},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,3},{0,4} },
-    // 7
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},
-      {0,0} },
-    // 8
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,3},{0,4} },
-    // 9
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,4} }
-  };
-
-  // Количество точек для каждой цифры (по массиву выше)
-  static const size_t digits_len[] = {12, 5, 11, 9, 6, 11, 13, 7, 13, 12};
-
-  if (number > 9) return; // Защита от неверных входных данных
-
-  fade_in_sequence(x, y, digits[number], digits_len[number], speed_step_light, delay_light);
+  switch (number) {
+    /////////////////////////////////////////////////////////////////////////////////////////     0
+    case 0:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 4, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     0
+    /////////////////////////////////////////////////////////////////////////////////////////     1
+    case 1:
+      //step one
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     1
+    /////////////////////////////////////////////////////////////////////////////////////////     2
+    case 2:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 4, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     2
+    /////////////////////////////////////////////////////////////////////////////////////////     3
+    case 3:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 4, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     3
+    /////////////////////////////////////////////////////////////////////////////////////////     4
+    case 4:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     4
+    /////////////////////////////////////////////////////////////////////////////////////////     5
+    case 5:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 4, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     5
+    /////////////////////////////////////////////////////////////////////////////////////////     6
+    case 6:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 4, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     6
+    /////////////////////////////////////////////////////////////////////////////////////////     7
+    case 7:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     7
+    /////////////////////////////////////////////////////////////////////////////////////////     8
+    case 8:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 4, speed_step_light);
+      delay(delay_light);
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     8
+    /////////////////////////////////////////////////////////////////////////////////////////     9
+    case 9:
+      //step one
+      draw_pixel_slow_white(x + 2, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 3, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 2, y + 4, speed_step_light);
+      delay(delay_light);
+      //step two
+      draw_pixel_slow_white(x + 1, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x + 1, y + 4, speed_step_light);
+      delay(delay_light);
+      //step tree
+      draw_pixel_slow_white(x, y, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 1, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 2, speed_step_light);
+      delay(delay_light);
+      draw_pixel_slow_white(x, y + 4, speed_step_light);
+      delay(delay_light);
+      break;
+      /////////////////////////////////////////////////////////////////////////////////////////     9
+  }
 }
+
 
 
 void draw_number_fast(const uint8_t number, const uint8_t x, const uint8_t y) {
   clear_number_fast(x, y);
+  switch (number) {
+    /////////////////////////////////////////////////////////////////////////////////////////     0
+    case 0:
+      //step one
+      draw_pixel_fast(x + 2, y);
 
-  static const PixelPos digits[][20] = {
-    // 0
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,4},
-      {0,0},{0,1},{0,2},{0,3},{0,4} },
-    // 1
-    { {1,0},{1,1},{1,2},{1,3},{1,4} },
-    // 2
-    { {2,0},{2,1},{2,2},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,2},{0,3},{0,4} },
-    // 3
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,2},{0,4} },
-    // 4
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,2},
-      {0,0},{0,1},{0,2} },
-    // 5
-    { {2,0},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,4} },
-    // 6
-    { {2,0},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,3},{0,4} },
-    // 7
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},
-      {0,0} },
-    // 8
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,3},{0,4} },
-    // 9
-    { {2,0},{2,1},{2,2},{2,3},{2,4},
-      {1,0},{1,2},{1,4},
-      {0,0},{0,1},{0,2},{0,4} }
-  };
+      draw_pixel_fast(x + 2, y + 1 );
 
-  static const size_t digits_len[] = {12, 5, 11, 9, 6, 11, 13, 7, 13, 12};
+      draw_pixel_fast(x + 2, y + 2 );
 
-  if (number > 9) return;
+      draw_pixel_fast(x + 2, y + 3 );
 
-  draw_white_sequence_fast(x, y, digits[number], digits_len[number]);
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      draw_pixel_fast(x, y + 1 );
+
+      draw_pixel_fast(x, y + 2 );
+
+      draw_pixel_fast(x, y + 3 );
+
+      draw_pixel_fast(x, y + 4 );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     0
+    /////////////////////////////////////////////////////////////////////////////////////////     1
+    case 1:
+      //step one
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 1 );
+
+      draw_pixel_fast(x + 1, y + 2 );
+
+      draw_pixel_fast(x + 1, y + 3 );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     1
+    /////////////////////////////////////////////////////////////////////////////////////////     2
+    case 2:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 1 );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 2 );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      //step tree
+      draw_pixel_fast(x, y + 2 );
+
+      draw_pixel_fast(x, y + 3 );
+
+      draw_pixel_fast(x, y + 4 );
+
+      draw_pixel_fast(x, y );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     2
+    /////////////////////////////////////////////////////////////////////////////////////////     3
+    case 3:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 1 );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 3 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 2 );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      draw_pixel_fast(x, y + 2 );
+
+      draw_pixel_fast(x, y + 4 );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     3
+    /////////////////////////////////////////////////////////////////////////////////////////     4
+    case 4:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 1 );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 3 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y + 2 );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      draw_pixel_fast(x, y + 1 );
+
+      draw_pixel_fast(x, y + 2 );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     4
+    /////////////////////////////////////////////////////////////////////////////////////////     5
+    case 5:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 3 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 2 );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      draw_pixel_fast(x, y + 1 );
+
+      draw_pixel_fast(x, y + 2 );
+
+      draw_pixel_fast(x, y + 4 );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     5
+    /////////////////////////////////////////////////////////////////////////////////////////     6
+    case 6:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 3 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 2 );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      draw_pixel_fast(x, y + 1 );
+
+      draw_pixel_fast(x, y + 2 );
+
+      draw_pixel_fast(x, y + 3 );
+
+      draw_pixel_fast(x, y + 4 );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     6
+    /////////////////////////////////////////////////////////////////////////////////////////     7
+    case 7:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 1 );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 3 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     7
+    /////////////////////////////////////////////////////////////////////////////////////////     8
+    case 8:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 1 );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 3 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 2 );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      draw_pixel_fast(x, y + 1 );
+
+      draw_pixel_fast(x, y + 2 );
+
+      draw_pixel_fast(x, y + 3 );
+
+      draw_pixel_fast(x, y + 4 );
+
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     8
+    /////////////////////////////////////////////////////////////////////////////////////////     9
+    case 9:
+      //step one
+      draw_pixel_fast(x + 2, y );
+
+      draw_pixel_fast(x + 2, y + 1 );
+
+      draw_pixel_fast(x + 2, y + 2 );
+
+      draw_pixel_fast(x + 2, y + 3 );
+
+      draw_pixel_fast(x + 2, y + 4 );
+
+      //step two
+      draw_pixel_fast(x + 1, y );
+
+      draw_pixel_fast(x + 1, y + 2 );
+
+      draw_pixel_fast(x + 1, y + 4 );
+
+      //step tree
+      draw_pixel_fast(x, y );
+
+      draw_pixel_fast(x, y + 1 );
+
+      draw_pixel_fast(x, y + 2 );
+
+      draw_pixel_fast(x, y + 4 );
+
+      break;
+      /////////////////////////////////////////////////////////////////////////////////////////     9
+  }
 }
 
 
@@ -357,12 +790,12 @@ void draw_point(const uint8_t x, const uint8_t y) {
 }
 void draw_minus(const uint8_t x, const uint8_t y) {
   for (uint8_t i = 0; i <= 2; i++) {
-    draw_pixel_immediate(x + i, y + 2, 255, 255, 255);  //blu
+    draw_pixel_now(x + i, y + 2, 255, 255, 255);  //blu
   }
 }
 void draw_comma(const uint8_t x, const uint8_t y) {
-  draw_pixel_immediate(x, y, 255, 255, 125);  //point
-  //draw_pixel_immediate(x + 7, y + 5, 255, 255, 125);  //point
+  draw_pixel_now(x, y, 255, 255, 125);  //point
+  //draw_pixel_now(x + 7, y + 5, 255, 255, 125);  //point
 }
 #define NUMBER_2_POSITION_X 4  // x "x".x
 #define NUMBER_3_POSITION_X 8  // x  x ."x"
