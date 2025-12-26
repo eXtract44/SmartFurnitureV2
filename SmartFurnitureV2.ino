@@ -1060,7 +1060,7 @@ void draw_time_esp_fast(uint8_t number, const uint8_t x, const uint8_t y) {
 }
 void draw_hour_esp(uint8_t number, const uint8_t x, const uint8_t y) {
   uint8_t tens, integer = 0U;
-  static uint8_t tens_old, integer_old = 25;
+  static uint8_t tens_old = 13, integer_old = 25;
   //number = constrain(number, 0, 24);
   tens = number / 10;
   integer = number % 10;
@@ -1070,11 +1070,11 @@ void draw_hour_esp(uint8_t number, const uint8_t x, const uint8_t y) {
   }
   if (tens != tens_old) {
     tens_old = tens;
-    if (tens == 0) {
-      clear_number_fast(x, y);
-    } else {
-      draw_number_slow(tens, x, y);
-    }
+    //if (tens == 0) {
+    //  clear_number_fast(x, y);
+    //} else {
+    draw_number_slow(tens, x, y);
+    //}
   }
 }
 void draw_min_esp(uint8_t number, const uint8_t x, const uint8_t y) {
@@ -1864,18 +1864,47 @@ void refresh_all_data() {  //1 sec
     }
   }
 }
+void switchCurrentMode(uint8_t mode) {
+  static uint8_t mode_old = MODE_NORMAL;
+  if (mode_old != mode) {
+    setAll(0, 0, 0);
+    switch (mode) {
+      case MODE_NORMAL:
+        delay(100);
+        push_all_values();
+        break;
+      case MODE_FIRE:
+        //setAll(0, 0, 0);
+        break;
+      case MODE_CLOUD:
+        //setAll(0, 0, 0);
+        break;
+      case MODE_RAIN:
+        //setAll(0, 0, 0);
+        break;
+    }
+    mode_old = mode;
+  }
+}
 void loop() {
-  static unsigned long previousMillis_fire = 0,previousMillis_normal = 0;
+  static unsigned long previousMillis_normal = 0;
   unsigned long currentMillis = millis();
-  if(digitalRead(BTN_TOUCH_PIN_1)){
-    setAll(0, 0, 0);
-    push_all_values();
-    CURRENT_MODE = MODE_NORMAL;
+  if (digitalRead(BTN_TOUCH_PIN_1)) {
+    CURRENT_MODE++;
+    if (CURRENT_MODE > MODE_RAIN) {
+      CURRENT_MODE = MODE_NORMAL;
+    }
+    delay(800);
   }
-   if(digitalRead(BTN_TOUCH_PIN_2)){
-    setAll(0, 0, 0);
-    CURRENT_MODE = MODE_FIRE;
-  }
+
+  /*if(digitalRead(BTN_TOUCH_PIN_2)){
+      CURRENT_MODE--;
+    if(CURRENT_MODE <= MODE_NORMAL || CURRENT_MODE > =MODE_RAIN){
+      CURRENT_MODE = MODE_RAIN;
+    }
+   delay(800);
+  }*/
+  switchCurrentMode(CURRENT_MODE);
   //uart_menu_char();
 
   switch (CURRENT_MODE) {
@@ -1886,9 +1915,13 @@ void loop() {
       }
       break;
     case MODE_FIRE:
-   fire_vertical_advanced();
+      fire_vertical_advanced();
       break;
-    case MODE_SNAKE:
+    case MODE_CLOUD:
+      sand_hourglass();
+      break;
+    case MODE_RAIN:
+      rain_on_window();
       break;
   }
 }
@@ -2019,349 +2052,282 @@ void read_uart() {
     }
   }
 }
-void draw_line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t r, uint8_t g, uint8_t b) {
-  int step = abs(y2 - y1) > abs(x2 - x1);
-  if (step)
-  {
-    swap_(x1, y1);
-    swap_(x2, y2);
-  }
-  if (x1 > x2)
-  {
-    swap_(x1, x2);
-    swap_(y1, y2);
-  }
-  int dx, dy;
-  dx = x2 - x1;
-  dy = abs(y2 - y1);
-  int err = dx / 2;
-  int ystep;
-  if (y1 < y2) ystep = 1;
-  else ystep = -1;
-  for (; x1 <= x2; x1++)
-  {
-    if (step) draw_pixel_now(y1, x1, r, g, b);
-    else draw_pixel_now(x1, y1, r, g, b);
-    err -= dy;
-    if (err < 0)
-    {
-      y1 += ystep;
-      err += dx;
-    }
-  }
-  strip.show();
-}
-void draw_rect(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t r, uint8_t g, uint8_t b) {
-  draw_line(x1, y1, x2,  y1, r, g, b);
-  draw_line(x2, y1, x2,  y2, r, g, b);
-  draw_line(x1, y1, x1,  y2, r, g, b);
-  draw_line(x1, y2, x2,  y2, r, g, b);
-}
-void draw_fire_hor() {
-  uint8_t rand_x = random(1, LED_STRIP_LENGHT + 1);
-  uint8_t rand_y = random(1, LED_STRIP_HIGH - 6);
-  draw_line(rand_x, 1, rand_x, LED_STRIP_HIGH, 0, 0, 0);
-  draw_line(rand_x, LED_STRIP_HIGH, rand_x, rand_y, 128, 17, 0);
-  draw_pixel_now(rand_x, rand_y + 5, 250, 152, 0); //1
-  draw_pixel_now(rand_x, rand_y + 4, 255, 117, 0); //2
-  draw_pixel_now(rand_x, rand_y + 3, 252, 100, 0); //3
-  draw_pixel_now(rand_x, rand_y + 2, 215, 53, 2); //4
-  draw_pixel_now(rand_x, rand_y + 1, 182, 34, 3); //5
-}
-void draw_fire_ver() {
-  uint8_t rand_x = random(1, 5);
-  uint8_t rand_y = random(1, 21);
-  draw_line(1, rand_y, 7, rand_y, 0, 0, 0);
-  draw_line(1, rand_y, rand_x, rand_y, 128, 17, 0);
-  draw_pixel_now(rand_x + 3, rand_y, 250, 152, 0); //1
-  //draw_pixel_now(rand_x, rand_y+4, 255, 117, 0); //2
-  draw_pixel_now(rand_x + 2, rand_y, 252, 100, 0); //3
-  //draw_pixel_now(rand_x, rand_y+2, 215, 53, 2); //4
-  draw_pixel_now(rand_x + 1, rand_y, 182, 34, 3); //5
-}
 void setPixel(int Pixel, byte red, byte green, byte blue) {
   strip.setPixelColor(Pixel, strip.Color(red, green, blue));
 }
 void setAll(byte red, byte green, byte blue) {
-  for (int i = 0; i < LED_COUNT_LED; i++ ) {
+  for (int i = 0; i < LED_COUNT_LED; i++) {
     setPixel(i, red, green, blue);
   }
   strip.show();
 }
-#define LED_COUNT_FIRE 41
-void Fire_ver(int Cooling, int Sparking, int SpeedDelay) {
-  static byte heat[LED_COUNT_FIRE];
-  int cooldown;
+void draw_pixel_raw_new(uint8_t x, uint8_t y,
+                        uint8_t r, uint8_t g, uint8_t b) {
+  // размеры матрицы
+  const uint8_t width = 14;   // количество LED по горизонтали (X)
+  const uint8_t height = 41;  // количество LED по вертикали (Y)
 
-  // Step 1.  Cool down every cell a little
-  for ( int i = 0; i < LED_COUNT_FIRE; i++) { //LED_COUNT
-    cooldown = random(0, ((Cooling * 10) / LED_COUNT_FIRE) + 2);
+  // защита от выхода за границы
+  if (x >= LED_STRIP_LENGHT || y >= height) return;
 
-    if (cooldown > heat[i]) {
-      heat[i] = 0;
-    } else {
-      heat[i] = heat[i] - cooldown;
+  uint16_t index;
+
+  if ((y & 1) == 0) {
+    // четная строка: слева направо
+    index = y * LED_STRIP_LENGHT + x;
+  } else {
+    // нечетная строка: справа налево
+    index = y * LED_STRIP_LENGHT + (LED_STRIP_LENGHT - 1 - x);
+  }
+
+  strip.setPixelColor(index, r, g, b);
+}
+void fire_vertical_advanced() {
+  const uint8_t width = 14;
+  const uint8_t height = 41;
+
+  static uint8_t heat[41][14];  // [y][x]
+  static float sparks_y[14];    // высота огоньков/искорок для каждого x
+  static uint32_t last_ms = 0;
+  if (millis() - last_ms < 35) return;  // ~28 FPS
+  last_ms = millis();
+
+  // 1. Cooling + мягкое мерцание
+  for (uint8_t y = 0; y < height; y++) {
+    for (uint8_t x = 0; x < width; x++) {
+      uint8_t cooldown = (uint8_t)random(0, 20);
+      heat[y][x] = (heat[y][x] > cooldown) ? heat[y][x] - cooldown : 0;
+
+      // мягкое мерцание
+      if (random(255) < 15) {
+        uint16_t tmp = heat[y][x] + (uint8_t)random(0, 30);
+        heat[y][x] = (tmp > 255) ? 255 : (uint8_t)tmp;
+      }
     }
   }
 
-  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for ( int k = LED_COUNT_FIRE - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
+  // 2. Распространение тепла вверх с плавной волной
+  for (uint8_t x = 0; x < width; x++) {
+    for (int y = 0; y < height - 2; y++) {
+      int dx = 0;
+      if (x > 0 && x < width - 1) dx = random(-1, 2);  // смещение для волны
+      uint8_t src_x = constrain(x + dx, 0, width - 1);
+      heat[y][x] = (uint8_t)((heat[y + 1][src_x] + heat[y + 2][src_x]) >> 1);
+    }
   }
 
-  // Step 3.  Randomly ignite new 'sparks' near the bottom
-  if ( random(255) < Sparking ) {
-    int y = random(7);
-    heat[y] = heat[y] + random(160, 255);
-
+  // 3. Зажигание нижнего ряда
+  for (uint8_t x = 0; x < width; x++) {
+    if (random(255) < 180) {
+      heat[height - 1][x] = (uint8_t)random(180, 255);
+    }
   }
-  int r = random(1, LED_STRIP_LENGHT + 1);
-  // Step 4.  Convert heat to LED colors
-  for ( int j = 0; j < LED_COUNT_FIRE; j++) {
-    setPixelHeatColor(j, heat[j], r);
+
+  // 4. Случайные искры, которые поднимаются
+  for (uint8_t x = 0; x < width; x++) {
+    if (random(255) < 20) {
+      sparks_y[x] = height - 1;  // старт снизу
+    }
+    // поднимаем искру вверх
+    if (sparks_y[x] > 0) {
+      sparks_y[x] -= random(1, 3);  // скорость подъема
+      uint8_t sy = (uint8_t)constrain(sparks_y[x], 0, height - 1);
+      heat[sy][x] = max(heat[sy][x], (uint8_t)random(150, 255));  // яркая вспышка
+    }
+  }
+
+  // 5. Отрисовка
+  for (uint8_t y = 0; y < height; y++) {
+    for (uint8_t x = 0; x < width; x++) {
+      uint8_t t = heat[y][x];
+      uint8_t r, g, b;
+
+      // градиент цвета от красного к желтому
+      if (t > 180) {
+        r = 255;
+        g = (uint8_t)(200 + min(55, t - 180));
+        b = (uint8_t)((t - 180) * 2);
+      } else if (t > 100) {
+        r = 255;
+        g = (uint8_t)((t - 100) * 3);
+        b = 0;
+      } else {
+        r = (uint8_t)(t * 3);
+        g = 0;
+        b = 0;
+      }
+
+      draw_pixel_raw_new(x, y, r, g, b);
+    }
   }
 
   strip.show();
-  delay(SpeedDelay);
+  yield();
 }
-void setPixelHeatColor (int Pixel, byte temperature, uint8_t x) {
-  // Scale 'heat' down from 0-255 to 0-191
-  byte t192 = round((temperature / 255.0) * 191);
+void sand_hourglass() {
+  const uint8_t W = 14;
+  const uint8_t H = 41;
 
-  // calculate ramp up from
-  byte heatramp = t192 & 0x3F; // 0..63
-  heatramp <<= 2; // scale up to 0..252
+  static uint8_t sand[H][W] = {};  // текущее состояние песка
+  static uint32_t last_update = 0;
 
-  // figure out which third of the spectrum we're in:
-  if ( t192 > 0x80) {                    // hottest
-    draw_pixel_now(x, LED_STRIP_HIGH - Pixel, 255, 255, heatramp);
-  } else if ( t192 > 0x40 ) {            // middle
-    draw_pixel_now(x, LED_STRIP_HIGH - Pixel, 255, heatramp, 0);
-  } else {                               // coolest
-    draw_pixel_now(x, LED_STRIP_HIGH - Pixel, heatramp, 0, 0);
+  if (millis() - last_update < 150) return;  // скорость падения
+  last_update = millis();
+
+  // ---------- полная маска песочных часов ----------
+  static const uint8_t mask[H][W] = {
+    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
+    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
+    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
+    { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
+    { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
+    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
+    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
+    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
+    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },  // ряд 20 — середина
+    // Нижняя половина — зеркальное отражение верхней
+    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
+    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
+    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
+  };
+
+  // ---------- если песок пуст сверху, инициализируем ----------
+  bool empty = true;
+  for (uint8_t x = 0; x < W; x++)
+    if (sand[0][x]) empty = false;
+  if (empty) {
+    for (uint8_t y = 0; y < H; y++)
+      for (uint8_t x = 0; x < W; x++)
+        sand[y][x] = mask[y][x];
   }
-}
-#define LED_COUNT_METEOR 41
-void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay, uint8_t x) {
-  setAll(0, 0, 0);
-  for (int i = 0; i < LED_COUNT_METEOR + LED_COUNT_METEOR; i++) {
-    // fade brightness all LEDs one step
-    for (int j = 0; j < LED_COUNT_METEOR; j++) {
-      if ( (!meteorRandomDecay) || (random(10) > 5) ) {
-        fadeToBlack(j, meteorTrailDecay , x);
+
+  // ---------- падение песка ----------
+  for (int y = H - 2; y >= 0; y--) {
+    for (int x = 0; x < W; x++) {
+      if (sand[y][x] && mask[y + 1][x] && sand[y + 1][x] == 0) {
+        sand[y + 1][x] = sand[y][x];
+        sand[y][x] = 0;
       }
     }
-    // draw meteor
-    for (int j = 0; j < meteorSize; j++) {
-      if ( ( i - j < LED_COUNT_METEOR) && (i - j >= 0) ) {
-        // draw_pixel_now(x, LED_COUNT_METEOR-i-j, red, green, blue);
-        draw_pixel_now(x, i - j, red, green, blue);
-        //setPixel(i-j, red, green, blue);
+  }
+
+  // ---------- отрисовка ----------
+  for (uint8_t y = 0; y < H; y++) {
+    for (uint8_t x = 0; x < W; x++) {
+      if (sand[y][x]) draw_pixel_raw_new(x, y, 200, 180, 50);  // песок
+      else draw_pixel_raw_new(x, y, 0, 0, 0);
+    }
+  }
+
+  strip.show();
+}
+
+void rain_on_window() {
+  const uint8_t W = 14;
+  const uint8_t H = 41;
+  const uint8_t MAX_DROPS = 25;
+
+  static uint32_t last_ms = 0;
+  if (millis() - last_ms < 90) return;  // медленное обновление
+  last_ms = millis();
+
+  struct Drop {
+    float x, y;
+    float dx;
+    float speed;
+    uint8_t length;
+    uint8_t brightness;
+    bool branch;  // есть разветвление
+  };
+
+  static Drop drops[MAX_DROPS] = {};
+
+  // ---------- обновление капель ----------
+  for (uint8_t i = 0; i < MAX_DROPS; i++) {
+    Drop& d = drops[i];
+
+    if (d.brightness == 0) {
+      d.x = random(W);
+      d.y = 0;
+      d.dx = (random(-10, 11)) / 40.0;  // слегка влево/вправо
+      d.speed = random(1, 3) / 3.0;     // разная скорость
+      d.length = random(2, 6);
+      d.brightness = random(120, 200);
+      d.branch = random(0, 5) == 0;  // 20% шанс разветвления
+      continue;
+    }
+
+    // движение капли
+    d.x += d.dx;
+    d.y += d.speed;
+
+    // если капля ушла за низ → сброс
+    if (d.y >= H) d.brightness = 0;
+
+    // случайное небольшое дрожание/ветер
+    if (random(0, 10) == 0) d.dx += ((random(-5, 6)) / 50.0);
+  }
+
+  // ---------- очистка ----------
+  for (uint8_t y = 0; y < H; y++)
+    for (uint8_t x = 0; x < W; x++)
+      draw_pixel_raw_new(x, y, 0, 0, 0);
+
+  // ---------- отрисовка ----------
+  for (uint8_t i = 0; i < MAX_DROPS; i++) {
+    Drop& d = drops[i];
+    if (d.brightness == 0) continue;
+
+    int bx = (int)d.x;
+    int by_start = (int)d.y;
+    int by_end = by_start - d.length + 1;
+    if (by_end < 0) by_end = 0;
+
+    // рисуем каплю с градиентом
+    for (int by = by_start; by >= by_end; by--) {
+      uint8_t b = d.brightness * (by - by_end + 1) / d.length;
+      draw_pixel_raw_new(bx, by, 0, 0, b);
+    }
+
+    // ---------- разветвление ----------
+    if (d.branch && by_start < H - 1) {
+      int bx2 = bx + ((random(0, 2) == 0) ? -1 : 1);
+      if (bx2 >= 0 && bx2 < W) {
+        for (int by = by_start; by >= by_end; by--) {
+          uint8_t b = d.brightness / 2;
+          draw_pixel_raw_new(bx2, by, 0, 0, b);
+        }
       }
     }
-    strip.show();
-    delay(SpeedDelay);
   }
+
+  strip.show();
 }
-void fadeToBlack(int ledNo, byte fadeValue, uint8_t x) {
-  // NeoPixel
-  uint32_t oldColor;
-  uint8_t r, g, b;
-  //int value;
-
-  oldColor = strip.getPixelColor(ledNo);
-  r = (oldColor & 0x00ff0000UL) >> 16;
-  g = (oldColor & 0x0000ff00UL) >> 8;
-  b = (oldColor & 0x000000ffUL);
-
-  r = (r <= 10) ? 0 : (int) r - (r * fadeValue / 256);
-  g = (g <= 10) ? 0 : (int) g - (g * fadeValue / 256);
-  b = (b <= 10) ? 0 : (int) b - (b * fadeValue / 256);
-
-  //strip.setPixelColor(ledNo, r,g,b);
-  draw_pixel_now(x, ledNo, r, g, b);
-  //draw_pixel_now(x, LED_COUNT_METEOR-ledNo, r,g,b);
-}
-void fire_idle() {
-
-  //uint8_t gg = random(1, 15);
-  //meteorRain(0xff, 0xff, 0xff, 10, 64, true, 30, gg);
-  Fire_ver(55, 120, 15);
-}
-void lamp_on(uint8_t x, uint8_t y) {
-  uint8_t speed_light = 40;
-
-  for (uint16_t rgb = 0; rgb < 255; rgb = rgb + speed_light) {
-
-    for (uint8_t i = 0; i <= 3; i++) {
-      draw_pixel_now(x + 3, y + i + 7, rgb, rgb, rgb);
-    }
-
-    for (uint8_t i = 0; i <= 5; i++) {
-      draw_pixel_now(x + 4, y + i + 6, rgb, rgb, rgb);
-    }
-
-    for (uint8_t i = 0; i <= 7; i++) {
-      draw_pixel_now(x + 5, y + i + 5, rgb, rgb, rgb);
-    }
-
-    for (uint8_t i = 0; i <= 7; i++) {
-      draw_pixel_now(x + 6, y + i + 5, rgb, rgb, rgb);
-    }
-    for (uint8_t i = 0; i <= 7; i++) {
-      draw_pixel_now(x + 7, y + i + 5, rgb, rgb, rgb);
-    }
-    for (uint8_t i = 0; i <= 7; i++) {
-      draw_pixel_now(x + 8, y + i + 5, rgb, rgb, rgb);
-    }
-
-    for (uint8_t i = 0; i <= 5; i++) {
-      draw_pixel_now(x + 9, y + i + 6, rgb, rgb, rgb);
-    }
-    for (uint8_t i = 0; i <= 3; i++) {
-      draw_pixel_now(x + 10, y + i + 7, rgb, rgb, rgb);
-    }
-
-
-    draw_pixel_now(x + 5, y + 2 , rgb, rgb, rgb);
-    draw_pixel_now(x + 5, y + 3 , rgb, rgb, rgb);
-
-    draw_pixel_now(x + 8, y + 2 , rgb, rgb, rgb);
-    draw_pixel_now(x + 8, y + 3 , rgb, rgb, rgb);
-
-    draw_pixel_now(x + 2, y + 4 , rgb, rgb, rgb);
-    draw_pixel_now(x + 3, y + 5 , rgb, rgb, rgb);
-
-    draw_pixel_now(x, y + 9, rgb, rgb, rgb);
-    draw_pixel_now(x + 1, y + 9, rgb, rgb, rgb);
-
-    draw_pixel_now(x + 2, y + 13, rgb, rgb, rgb);
-    draw_pixel_now(x + 3, y + 12, rgb, rgb, rgb);
-
-    draw_pixel_now(x + 5, y + 14, rgb, rgb, rgb);
-    draw_pixel_now(x + 5, y + 15, rgb, rgb, rgb);
-
-    draw_pixel_now(x + 8, y + 14, rgb, rgb, rgb);
-    draw_pixel_now(x    + 8, y + 15, rgb, rgb, rgb);
-
-    draw_pixel_now(x + 10, y + 12, rgb, rgb, rgb);
-    draw_pixel_now(x + 11, y + 13, rgb, rgb, rgb);
-
-    draw_pixel_now(x + 12, y + 9, rgb, rgb, rgb);
-    draw_pixel_now(x + 13, y + 9, rgb, rgb, rgb);
-
-    draw_pixel_now(x + 10, y + 5, rgb, rgb, rgb);
-    draw_pixel_now(x + 11, y + 4, rgb, rgb, rgb);
-
-    strip.show();
-  }
-  delay(100);
-
-}
-
-void draw_pixel_raw_new(uint8_t x, uint8_t y,
-                        uint8_t r, uint8_t g, uint8_t b)
-{
-    // размеры матрицы
-    const uint8_t width  = 14;  // количество LED по горизонтали (X)
-    const uint8_t height = 41;  // количество LED по вертикали (Y)
-
-    // защита от выхода за границы
-    if (x >= LED_STRIP_LENGHT || y >= height) return;
-
-    uint16_t index;
-
-    if ((y & 1) == 0) {
-        // четная строка: слева направо
-        index = y * LED_STRIP_LENGHT + x;
-    } else {
-        // нечетная строка: справа налево
-        index = y * LED_STRIP_LENGHT + (LED_STRIP_LENGHT - 1 - x);
-    }
-
-    strip.setPixelColor(index, r, g, b);
-}
-void fire_vertical_advanced()
-{
-    const uint8_t width  = 14;
-    const uint8_t height = 41;
-
-    static uint8_t heat[41][14];    // [y][x]
-    static float sparks_y[14];      // высота огоньков/искорок для каждого x
-    static uint32_t last_ms = 0;
-    if (millis() - last_ms < 35) return;  // ~28 FPS
-    last_ms = millis();
-
-    // 1. Cooling + мягкое мерцание
-    for (uint8_t y = 0; y < height; y++) {
-        for (uint8_t x = 0; x < width; x++) {
-            uint8_t cooldown = (uint8_t)random(0, 20);
-            heat[y][x] = (heat[y][x] > cooldown) ? heat[y][x] - cooldown : 0;
-
-            // мягкое мерцание
-            if (random(255) < 15) {
-                uint16_t tmp = heat[y][x] + (uint8_t)random(0, 30);
-                heat[y][x] = (tmp > 255) ? 255 : (uint8_t)tmp;
-            }
-        }
-    }
-
-    // 2. Распространение тепла вверх с плавной волной
-    for (uint8_t x = 0; x < width; x++) {
-        for (int y = 0; y < height - 2; y++) {
-            int dx = 0;
-            if (x > 0 && x < width - 1) dx = random(-1, 2);  // смещение для волны
-            uint8_t src_x = constrain(x + dx, 0, width - 1);
-            heat[y][x] = (uint8_t)((heat[y + 1][src_x] + heat[y + 2][src_x]) >> 1);
-        }
-    }
-
-    // 3. Зажигание нижнего ряда
-    for (uint8_t x = 0; x < width; x++) {
-        if (random(255) < 180) {
-            heat[height - 1][x] = (uint8_t)random(180, 255);
-        }
-    }
-
-    // 4. Случайные искры, которые поднимаются
-    for (uint8_t x = 0; x < width; x++) {
-        if (random(255) < 20) {
-            sparks_y[x] = height - 1;  // старт снизу
-        }
-        // поднимаем искру вверх
-        if (sparks_y[x] > 0) {
-            sparks_y[x] -= random(1, 3);  // скорость подъема
-            uint8_t sy = (uint8_t)constrain(sparks_y[x], 0, height - 1);
-            heat[sy][x] = max(heat[sy][x], (uint8_t)random(150, 255));  // яркая вспышка
-        }
-    }
-
-    // 5. Отрисовка
-    for (uint8_t y = 0; y < height; y++) {
-        for (uint8_t x = 0; x < width; x++) {
-            uint8_t t = heat[y][x];
-            uint8_t r, g, b;
-
-            // градиент цвета от красного к желтому
-            if (t > 180) {
-                r = 255;
-                g = (uint8_t)(200 + min(55, t - 180));
-                b = (uint8_t)((t - 180) * 2);
-            } else if (t > 100) {
-                r = 255;
-                g = (uint8_t)((t - 100) * 3);
-                b = 0;
-            } else {
-                r = (uint8_t)(t * 3);
-                g = 0;
-                b = 0;
-            }
-
-            draw_pixel_raw_new(x, y, r, g, b);
-        }
-    }
-
-    strip.show();
-    yield();
-}
-

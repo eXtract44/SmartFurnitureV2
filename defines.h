@@ -54,7 +54,9 @@ https://dl.espressif.com/dl/package_esp32_index.json
 enum DIPLAY_MODE{
   MODE_NORMAL,
   MODE_FIRE,
-  MODE_SNAKE
+  MODE_CLOUD,
+  MODE_RAIN,
+  MODE_MAX
 };
 
 enum COLORS_ENUM{
