@@ -50,7 +50,7 @@ void push_all_values();
 void ini_ws2812b() {
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(1);  // Set BRIGHTNESS to about 1/5 (max = 255)
+  strip.setBrightness(5);  // Set BRIGHTNESS to about 1/5 (max = 255)
 }
 void draw_error_pixel() {
   draw_char('c', 1, 1, 255, 255, 255);
@@ -95,6 +95,9 @@ void draw_pixel_slow_white(const uint8_t x, const uint8_t y, const uint8_t speed
   draw_pixel_raw(x, y, rgb, rgb, rgb);
   strip.show();
   //}
+}
+void draw_pixel_rgb(const uint8_t x, const uint8_t y,const uint8_t r,const uint8_t g,const uint8_t b) {
+  draw_pixel_raw(x, y, r, g, b);
 }
 void draw_pixel_slow_red(const uint8_t x, const uint8_t y, const uint8_t speed_step) {
   for (uint16_t r = 0; r < 255; r += speed_step) {
@@ -413,6 +416,285 @@ void draw_number_slow(const uint8_t number, const uint8_t x, const uint8_t y) {
       break;
       /////////////////////////////////////////////////////////////////////////////////////////     9
   }
+}
+void draw_number_rgb(const uint8_t number, const uint8_t x, const uint8_t y,const uint8_t r,const uint8_t g,const uint8_t b) {
+  clear_number_fast(x, y);
+  switch (number) {
+    /////////////////////////////////////////////////////////////////////////////////////////     0
+    case 0:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 4,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     0
+    /////////////////////////////////////////////////////////////////////////////////////////     1
+    case 1:
+      //step one
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     1
+    /////////////////////////////////////////////////////////////////////////////////////////     2
+    case 2:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 4,  r, g, b);
+       
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     2
+    /////////////////////////////////////////////////////////////////////////////////////////     3
+    case 3:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 4,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     3
+    /////////////////////////////////////////////////////////////////////////////////////////     4
+    case 4:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     4
+    /////////////////////////////////////////////////////////////////////////////////////////     5
+    case 5:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 4,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     5
+    /////////////////////////////////////////////////////////////////////////////////////////     6
+    case 6:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 4,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     6
+    /////////////////////////////////////////////////////////////////////////////////////////     7
+    case 7:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     7
+    /////////////////////////////////////////////////////////////////////////////////////////     8
+    case 8:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 4,  r, g, b);
+       
+      break;
+    /////////////////////////////////////////////////////////////////////////////////////////     8
+    /////////////////////////////////////////////////////////////////////////////////////////     9
+    case 9:
+      //step one
+      draw_pixel_rgb(x + 2, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 3,  r, g, b);
+       
+      draw_pixel_rgb(x + 2, y + 4,  r, g, b);
+       
+      //step two
+      draw_pixel_rgb(x + 1, y,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x + 1, y + 4,  r, g, b);
+       
+      //step tree
+      draw_pixel_rgb(x, y,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 1,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 2,  r, g, b);
+       
+      draw_pixel_rgb(x, y + 4,  r, g, b);
+       
+      break;
+      /////////////////////////////////////////////////////////////////////////////////////////     9
+  }
+  strip.show();
 }
 void draw_number_fast(const uint8_t number, const uint8_t x, const uint8_t y) {
   clear_number_fast(x, y);
@@ -807,9 +1089,9 @@ void draw_point(const uint8_t x, const uint8_t y) {
   draw_pixel_raw(x, y, 255, 255, 90);
   strip.show();
 }
-void draw_minus(const uint8_t x, const uint8_t y) {
+void draw_minus(const uint8_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
   for (uint8_t i = 0; i <= 2; i++) {
-    draw_pixel_now(x + i, y + 2, 255, 255, 255);  //blu
+    draw_pixel_now(x + i, y + 2, r, g, b);  //blu
   }
 }
 void draw_comma(const uint8_t x, const uint8_t y) {
@@ -831,12 +1113,12 @@ void fill_line(const uint8_t y, byte r, byte g, byte b) {
   fill_number_fast(12, y, r, g, b);
 }
 void draw_int_string(int16_t number, const uint8_t x, const uint8_t y) {
-  uint16_t tens, integer = 0U;
+  uint16_t tens=999, integer = 0U;
   number = constrain(number, -99, 99);
   //clear_number_fast(x, y);
   if (number < 0) {         //-99
     integer = number * -1;  //-99 -> 99
-    draw_minus(x, y + 2);
+    draw_minus(x, y + 2,255,255,255);
     draw_number_slow(integer, x + WORK_COLUMN_2, y);
   } else {
     tens = number / 10;
@@ -855,7 +1137,7 @@ void draw_float_string(float number, const uint8_t x, const uint8_t y) {
   uint16_t temp_number = static_cast<int16_t>(number) * 10 * -1;  // 12.3 -> 123
 
   if (number < 0) {
-    draw_minus(x, y);
+    draw_minus(x, y,255,255,255);
   } else {
     tens = temp_number / 100;  // 123 -> 1
     if (tens == 0) {
@@ -939,7 +1221,7 @@ void draw_temperature_fast(float number, const uint8_t x, const uint8_t y) {
   temp_number = constrain(temp_number, -99, 999);  //limit number to 4 symbols (xxxx, -12.3)
   if (number < 0) {
     temp_number = temp_number * -1;
-    draw_minus(x, y);
+    draw_minus(x, y,255,255,255);
   } else {
     tens = temp_number / 100;      // 123 -> 1
     draw_number_fast(tens, x, y);  //draw "1"x.x
@@ -952,12 +1234,19 @@ void draw_temperature_fast(float number, const uint8_t x, const uint8_t y) {
   draw_number_fast(tenths, x + WORK_COLUMN_3, y);   //draw xx."3"
 }
 void draw_temperature_esp(float number, const uint8_t x, const uint8_t y) {
-  int16_t temp_number, tens, integer, tenths = 888;
-  static uint16_t tens_old, integer_old, tenths_old = 999;
-  static bool minus = 0;
-  static bool minus_old = 0;
+  int16_t temp_number=888, tens=888, integer=888, tenths = 888;
+  static uint16_t tens_old=999, integer_old=999, tenths_old = 999;
+  static bool minus = false,minus_old = false;
+  uint8_t r=255,g=255,b=255;
   temp_number = number * 10;                       // 12.3 -> 123
   temp_number = constrain(temp_number, -99, 999);  //limit number to 4 symbols (xxxx, -12.3)
+if(temp_number < 50){ // if <5*c set color blue
+  r=0;
+  g=0;
+  b=255;
+}
+
+
   if (!day_activated) {
     tens_old = ~tens_old;
     integer_old = ~integer_old;
@@ -965,8 +1254,10 @@ void draw_temperature_esp(float number, const uint8_t x, const uint8_t y) {
   } else {
     if (number < 0) {
       temp_number = temp_number * -1;
-      draw_minus(x, y);
+      
       minus = 1;
+      
+      draw_minus(x, y,r,g,b);
     } else {
       if (minus != minus_old) {
         minus_old = minus;
@@ -977,7 +1268,8 @@ void draw_temperature_esp(float number, const uint8_t x, const uint8_t y) {
       if (tens != tens_old) {
         tens_old = tens;
         if (temp_number > 99) {
-          draw_number_slow(tens, x, y);  //draw "1"x.x
+          draw_number_rgb(tens, x, y, r, g, b);
+          //draw_number_slow(tens, x, y);  //draw "1"x.x
         } else {
           clear_number_fast(x, y);  //clear "_"x.x
         }
@@ -991,13 +1283,15 @@ void draw_temperature_esp(float number, const uint8_t x, const uint8_t y) {
     }
     if (integer != integer_old) {
       integer_old = integer;
-      draw_number_slow(integer, x + WORK_COLUMN_2, y);  //draw x"2".x
+      draw_number_rgb(integer, x + WORK_COLUMN_2, y, r, g, b);
+      //draw_number_slow(integer, x + WORK_COLUMN_2, y);  //draw x"2".x
     }
     draw_comma(x + 7, y + 4);   //draw xx"."x
     tenths = temp_number % 10;  // 123 -> 3
     if (tenths != tenths_old) {
       tenths_old = tenths;
-      draw_number_slow(tenths, x + WORK_COLUMN_3, y);  //draw xx."3"
+      draw_number_rgb(tenths, x + WORK_COLUMN_3, y, r, g, b);
+      //draw_number_slow(tenths, x + WORK_COLUMN_3, y);  //draw xx."3"
     }
   }
 }
@@ -1015,7 +1309,7 @@ void draw_temperature_aht(float number, const uint8_t x, const uint8_t y) {
   } else {
     if (number < 0) {
       temp_number = temp_number * -1;
-      draw_minus(x, y);
+      draw_minus(x, y,255,255,255);
       minus = 1;
     } else {
       if (minus != minus_old) {
@@ -1674,6 +1968,7 @@ void debug_temt6000() {
 }
 void ini_buttons() {
   pinMode(BTN_TOUCH_PIN_1, INPUT);
+  pinMode(BTN_TOUCH_PIN_2, INPUT);
 }
 void ini_sgp() {
   Wire.begin();
@@ -1802,7 +2097,6 @@ void setup() {
   ini_buttons();
   Serial.println("init finish");
   push_all_values();
-  set_brightness_1();
 }
 void update_day() {
 #if AHT_SENSOR
@@ -1840,7 +2134,6 @@ void update_night() {
 }
 
 void refresh_all_data() {  //1 sec
-
 #if AHT_SENSOR
   read_aht();
 #endif
@@ -1918,7 +2211,7 @@ void loop() {
       fire_vertical_advanced();
       break;
     case MODE_CLOUD:
-      sand_hourglass();
+      snake_rgb_hunter();
       break;
     case MODE_RAIN:
       rain_on_window();
@@ -2164,92 +2457,272 @@ void fire_vertical_advanced() {
   strip.show();
   yield();
 }
-void sand_hourglass() {
-  const uint8_t W = 14;
-  const uint8_t H = 41;
+void snake_rgb_hunter()
+{
+    /*const uint8_t W = 14;
+    const uint8_t H = 41;
+    const uint8_t MAX_LEN = 40;
 
-  static uint8_t sand[H][W] = {};  // текущее состояние песка
-  static uint32_t last_update = 0;
+    static uint32_t last_ms = 0;
+    if (millis() - last_ms < 60) return;
+    last_ms = millis();
 
-  if (millis() - last_update < 150) return;  // скорость падения
-  last_update = millis();
+    // -------- состояние --------
+    static uint8_t len = 1;
+    static uint8_t body[MAX_LEN][2];
 
-  // ---------- полная маска песочных часов ----------
-  static const uint8_t mask[H][W] = {
-    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
-    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
-    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
-    { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-    { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
-    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
-    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
-    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
-    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },  // ряд 20 — середина
-    // Нижняя половина — зеркальное отражение верхней
-    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
-    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
-    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
-    { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
-    { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 },
-  };
+    static uint8_t hx = 0;
+    static uint8_t hy = 0;
 
-  // ---------- если песок пуст сверху, инициализируем ----------
-  bool empty = true;
-  for (uint8_t x = 0; x < W; x++)
-    if (sand[0][x]) empty = false;
-  if (empty) {
+    static uint8_t food_x = 255;
+    static uint8_t food_y = 255;
+
+    static uint8_t hue = 0;
+
+    // -------- если еды нет — создать --------
+    if (food_x == 255) {
+        food_x = random(W);
+        food_y = random(H);
+
+        hx = random(W);
+        hy = random(H);
+
+        body[0][0] = hx;
+        body[0][1] = hy;
+        len = 1;
+    }
+
+    // -------- движение к еде --------
+    int8_t dx = 0, dy = 0;
+
+    if (hx < food_x) dx = 1;
+    else if (hx > food_x) dx = -1;
+    else if (hy < food_y) dy = 1;
+    else if (hy > food_y) dy = -1;
+
+    // -------- сдвиг тела --------
+    for (int i = len - 1; i > 0; i--) {
+        body[i][0] = body[i - 1][0];
+        body[i][1] = body[i - 1][1];
+    }
+
+    hx += dx;
+    hy += dy;
+
+    body[0][0] = hx;
+    body[0][1] = hy;
+
+    // -------- поедание --------
+    if (hx == food_x && hy == food_y) {
+
+        if (len < MAX_LEN) len++;
+
+        // новая еда (не в теле)
+        bool ok;
+        do {
+            ok = true;
+            food_x = random(W);
+            food_y = random(H);
+            for (uint8_t i = 0; i < len; i++) {
+                if (body[i][0] == food_x && body[i][1] == food_y) {
+                    ok = false;
+                    break;
+                }
+            }
+        } while (!ok);
+    }
+
+    // -------- очистка --------
     for (uint8_t y = 0; y < H; y++)
-      for (uint8_t x = 0; x < W; x++)
-        sand[y][x] = mask[y][x];
-  }
+        for (uint8_t x = 0; x < W; x++)
+            draw_pixel_raw_new(x, y, 0, 0, 0);
 
-  // ---------- падение песка ----------
-  for (int y = H - 2; y >= 0; y--) {
-    for (int x = 0; x < W; x++) {
-      if (sand[y][x] && mask[y + 1][x] && sand[y + 1][x] == 0) {
-        sand[y + 1][x] = sand[y][x];
-        sand[y][x] = 0;
-      }
+    // -------- еда --------
+    draw_pixel_raw_new(food_x, food_y, 255, 255, 255);
+
+    // -------- змейка --------
+    for (uint8_t i = 0; i < len; i++) {
+
+        uint8_t h = hue + i * 7;
+        uint8_t region = h / 43;
+        uint8_t rem = (h - region * 43) * 6;
+
+        uint8_t r, g, b;
+        uint8_t q = 255 - rem;
+        uint8_t t = rem;
+
+        switch (region) {
+            case 0: r = 255; g = t;   b = 0;   break;
+            case 1: r = q;   g = 255; b = 0;   break;
+            case 2: r = 0;   g = 255; b = t;   break;
+            case 3: r = 0;   g = q;   b = 255; break;
+            case 4: r = t;   g = 0;   b = 255; break;
+            default:r = 255; g = 0;   b = q;   break;
+        }
+
+        draw_pixel_raw_new(body[i][0], body[i][1], r, g, b);
     }
-  }
 
-  // ---------- отрисовка ----------
-  for (uint8_t y = 0; y < H; y++) {
-    for (uint8_t x = 0; x < W; x++) {
-      if (sand[y][x]) draw_pixel_raw_new(x, y, 200, 180, 50);  // песок
-      else draw_pixel_raw_new(x, y, 0, 0, 0);
+    hue++;
+    strip.show();
+    */
+    
+    const uint8_t W = 14;
+    const uint8_t H = 41;
+    const uint8_t MAX_LEN = 55;
+
+    static uint32_t last_ms = 0;
+    if (millis() - last_ms < 75) return;
+    last_ms = millis();
+
+    // -------- состояние --------
+    static uint8_t len = 1;
+    static uint8_t body[MAX_LEN][2];
+    static uint8_t hx = 0, hy = 0;
+
+    static uint8_t food_x = 255, food_y = 255;
+    static uint8_t hue = 0;
+
+    static uint8_t pulse = 0;
+
+    // взрыв
+    static bool exploding = false;
+    static uint8_t explosion_step = 0;
+
+    // -------- инициализация --------
+    if (food_x == 255) {
+        food_x = random(W);
+        food_y = random(H);
+        hx = random(W);
+        hy = random(H);
+        body[0][0] = hx;
+        body[0][1] = hy;
+        len = 1;
     }
-  }
 
-  strip.show();
+    // ================= ВЗРЫВ =================
+    if (exploding) {
+
+        for (uint8_t y = 0; y < H; y++) {
+            for (uint8_t x = 0; x < W; x++) {
+
+                int dx = x - hx;
+                int dy = y - hy;
+                int d = abs(dx) + abs(dy);
+
+                if (d == explosion_step) {
+                    draw_pixel_raw_new(
+                        x, y,
+                        random(150,255),
+                        random(0,150),
+                        random(0,80)
+                    );
+                }
+            }
+        }
+
+        strip.show();
+        explosion_step++;
+
+        if (explosion_step > W + H) {
+            exploding = false;
+            explosion_step = 0;
+            len = 1;
+            body[0][0] = hx;
+            body[0][1] = hy;
+            food_x = 255; // перезапуск
+        }
+        return;
+    }
+
+    // -------- движение к еде --------
+    int8_t dx = 0, dy = 0;
+    if (hx < food_x) dx = 1;
+    else if (hx > food_x) dx = -1;
+    else if (hy < food_y) dy = 1;
+    else if (hy > food_y) dy = -1;
+
+    // -------- сдвиг тела --------
+    for (int i = len - 1; i > 0; i--) {
+        body[i][0] = body[i - 1][0];
+        body[i][1] = body[i - 1][1];
+    }
+
+    hx += dx;
+    hy += dy;
+    body[0][0] = hx;
+    body[0][1] = hy;
+
+    // -------- поедание --------
+    if (hx == food_x && hy == food_y) {
+
+        pulse = 8;
+
+        if (len < MAX_LEN) {
+            len++;
+        } else {
+            exploding = true;
+            explosion_step = 0;
+            return;
+        }
+
+        bool ok;
+        do {
+            ok = true;
+            food_x = random(W);
+            food_y = random(H);
+            for (uint8_t i = 0; i < len; i++) {
+                if (body[i][0] == food_x && body[i][1] == food_y) {
+                    ok = false;
+                    break;
+                }
+            }
+        } while (!ok);
+    }
+
+    // -------- очистка --------
+    for (uint8_t y = 0; y < H; y++)
+        for (uint8_t x = 0; x < W; x++)
+            draw_pixel_raw_new(x, y, 0, 0, 0);
+
+    // -------- еда --------
+    draw_pixel_raw_new(food_x, food_y, 255, 255, 255);
+
+    // -------- змейка --------
+    for (uint8_t i = 0; i < len; i++) {
+
+        uint8_t h = hue + i * 7;
+        uint8_t region = h / 43;
+        uint8_t rem = (h - region * 43) * 6;
+
+        uint8_t r, g, b;
+        uint8_t q = 255 - rem;
+        uint8_t t = rem;
+
+        switch (region) {
+            case 0: r = 255; g = t;   b = 0;   break;
+            case 1: r = q;   g = 255; b = 0;   break;
+            case 2: r = 0;   g = 255; b = t;   break;
+            case 3: r = 0;   g = q;   b = 255; break;
+            case 4: r = t;   g = 0;   b = 255; break;
+            default:r = 255; g = 0;   b = q;   break;
+        }
+
+        // пульс
+        if (pulse > 0) {
+            r = min<uint8_t>(255, r + pulse * 10);
+            g = min<uint8_t>(255, g + pulse * 10);
+            b = min<uint8_t>(255, b + pulse * 10);
+        }
+
+        draw_pixel_raw_new(body[i][0], body[i][1], r, g, b);
+    }
+
+    if (pulse > 0) pulse--;
+    hue++;
+    strip.show();
+
 }
-
 void rain_on_window() {
   const uint8_t W = 14;
   const uint8_t H = 41;

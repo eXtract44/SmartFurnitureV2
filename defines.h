@@ -35,7 +35,7 @@ https://dl.espressif.com/dl/package_esp32_index.json
 #define CONFIG_COLOR_TIME_COLON_BLINK 255, 255, 255 //RGB
 
 #define CONFIG_LED_SPEED_STEPS 250  //30  //0-255 Light speed_step animation numbers
-#define CONFIG_LED_DELAY_STEPS_mS 2         //30       //mS Light delay animation numbers
+#define CONFIG_LED_DELAY_STEPS_mS 1         //30       //mS Light delay animation numbers
 
 #define WORK_ROW_OFFSET 6
 #define WORK_ROW_1 1
