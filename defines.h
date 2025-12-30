@@ -59,13 +59,7 @@ enum DIPLAY_MODE{
   MODE_MAX
 };
 
-enum COLORS_ENUM{
-  COLOR_RED,
-  COLOR_GREEN,
-  COLOR_BLUE
-};
-
-struct esp {
-  double temp;
-  int humidity;
+struct openWeatherData_struct {
+  double openWeatherTemperature;
+  int openWeatherHumidity;
 };
