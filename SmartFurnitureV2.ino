@@ -392,8 +392,8 @@ void set_clean_line(const uint8_t y) {
   set_clear_number(12, y);
 }
 void set_humidity_openWeather(uint8_t number, const uint8_t x, const uint8_t y) {
-  uint16_t tens, integer = 0U;
-  static uint16_t tens_old, integer_old = 999;
+  uint16_t tens=0, integer = 0U;
+  static uint16_t tens_old=999, integer_old = 999;
   if (!day_activated) {
     tens_old = ~tens_old;
     integer_old = ~integer_old;
@@ -455,6 +455,11 @@ void set_temperature_openWeather(float number, const uint8_t x, const uint8_t y)
     g = 0;
     b = 255;
   }
+    if (temp_number > 250) {                          // if >25*c set color yellow
+    r = 255;
+    g = 255;
+    b = 0;
+  }
   if (!day_activated) {
     tens_old = ~tens_old;
     integer_old = ~integer_old;
@@ -499,10 +504,9 @@ void set_temperature_openWeather(float number, const uint8_t x, const uint8_t y)
   }
 }
 void set_temperature_aht(float number, const uint8_t x, const uint8_t y) {
-  int16_t temp_number, tens, integer, tenths = 888;
-  static uint16_t tens_old, integer_old, tenths_old = 999;
-  static bool minus = 0;
-  static bool minus_old = 0;
+  int16_t temp_number = 888, tens = 888, integer = 888, tenths = 888;
+  static uint16_t tens_old = 888, integer_old = 888, tenths_old = 999;
+  static bool minus = 0,minus_old = 0;
   temp_number = number * 10;                       // 12.3 -> 123
   temp_number = constrain(temp_number, -99, 999);  //limit number to 4 symbols (xxxx, -12.3)
   if (!day_activated) {
@@ -549,7 +553,7 @@ void set_temperature_aht(float number, const uint8_t x, const uint8_t y) {
   }
 }
 void set_hour_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
-  uint8_t tens, integer = 0U;
+  uint8_t tens=0, integer = 0U;
   static uint8_t tens_old = 13, integer_old = 25;
   //number = constrain(number, 0, 24);
   tens = number / 10;
@@ -560,16 +564,16 @@ void set_hour_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
   }
   if (tens != tens_old) {
     tens_old = tens;
-    //if (tens == 0) {
-    //  set_clear_number(x, y);
-    //} else {
+    if (number < 10) {
+      set_clear_number(x, y);
+    } else {
     set_number_rgb(tens, x, y, 255, 255, 255);
-    //}
+    }
   }
 }
 void set_min_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
-  uint8_t tens, integer = 0U;
-  static uint8_t tens_old, integer_old = 61;
+  uint8_t tens=0, integer = 0U;
+  static uint8_t tens_old=61, integer_old = 61;
   //number = constrain(number, 0, 60);
   tens = number / 10;     //12 -> 1
   integer = number % 10;  //12 -> 2
@@ -583,8 +587,8 @@ void set_min_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
   }
 }
 void set_mday_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
-  uint8_t tens, integer = 0U;
-  static uint8_t tens_old, integer_old = 32;
+  uint8_t tens=0, integer = 0U;
+  static uint8_t tens_old=32, integer_old = 32;
   if (!day_activated) {
     tens_old = ~tens_old;
     integer_old = ~integer_old;
@@ -600,7 +604,7 @@ void set_mday_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
     }
     if (tens != tens_old) {
       tens_old = tens;
-      if (tens == 0) {
+      if (number < 10) {
         set_clear_number(x, y);
       } else {
         set_number_rgb(tens, x, y, 255, 255, 255);
@@ -609,7 +613,7 @@ void set_mday_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
   }
 }
 void set_mon_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
-  uint8_t tens, integer = 0U;
+  uint8_t tens=0, integer = 0U;
   static uint8_t tens_old = 13, integer_old = 13;
   if (!day_activated) {
     tens_old = ~tens_old;
@@ -620,9 +624,13 @@ void set_mon_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
     integer = number % 10;              // 2
     if (tens != tens_old) {
       tens_old = tens;
-      //if (tens < 10) set_clear_number(x, y);
-      //else
+      if (number < 10) {
+        set_clear_number(x, y);
+      }
+      else{
       set_number_rgb(tens, x, y, 255, 255, 255);
+      }
+      
     }
     if (integer != integer_old) {
       integer_old = integer;
@@ -632,9 +640,54 @@ void set_mon_ntp(uint8_t number, const uint8_t x, const uint8_t y) {
 }
 void set_co2_sgp30(uint16_t number, const uint8_t x, const uint8_t y) {
   uint8_t symbol_len = 3;
-  uint16_t thousands, hundreds, tens, integer = 0U;
-  static uint16_t thousands_old, hundreds_old, tens_old, integer_old = 254U;
-  if (number >= 9999) number = 9999;
+  uint16_t thousands = 0, hundreds = 0, tens=0, integer = 0U;
+  static uint16_t thousands_old = 254U, hundreds_old = 254U, tens_old = 254U, integer_old = 254U;
+  uint8_t r,g,b;
+  static uint8_t current_color_mode = 0;
+  if (number >= 9999) {
+    number = 9999;
+  }
+
+ if(number <500){
+   if(current_color_mode != 0){  
+      thousands_old = 99;
+      hundreds_old = 199;
+      current_color_mode = 0;
+    }
+    r=255;
+    g=255;
+    b=255;
+  }
+  else if(number > 500 && number < 800){
+    if(current_color_mode != 1){  
+      thousands_old = 99;
+      hundreds_old = 199;
+      current_color_mode = 1;
+    }
+    r=0;
+    g=255;
+    b=0;
+  }else if (number > 800 && number < 1200){
+     if(current_color_mode != 2){  
+      thousands_old = 99;
+      hundreds_old = 199;
+      current_color_mode = 2;
+    }
+    r=255;
+    g=255;
+    b=0;
+  }
+else if (number > 1200 && number < 9999){
+     if(current_color_mode != 3){  
+      thousands_old = 99;
+      hundreds_old = 199;
+      current_color_mode = 3;
+    }
+    r=255;
+    g=0;
+    b=0;
+  }
+  
 
   thousands = number / 1000;  //1234 -> 1
   hundreds = number % 1000;   //1234 -> 234
@@ -648,20 +701,20 @@ void set_co2_sgp30(uint16_t number, const uint8_t x, const uint8_t y) {
     if (number < 1000) {
       set_clear_number(x, y);
     } else {
-      set_number_fast_narrow_sgp30(thousands, x, y, 255, 255, 255);
+      set_number_fast_narrow_sgp30(thousands, x, y, r, g, b);
     }
   }
   if (hundreds != hundreds_old) {
     hundreds_old = hundreds;
-    set_number_fast_narrow_sgp30(hundreds, x + symbol_len + 1, y, 255, 255, 255);
+    set_number_fast_narrow_sgp30(hundreds, x + symbol_len + 1, y, r, g, b);
   }
   if (tens != tens_old) {
     tens_old = tens;
-    set_number_fast_narrow_sgp30(tens, x + symbol_len * 2 + 2, y, 255, 255, 255);
+    set_number_fast_narrow_sgp30(tens, x + symbol_len * 2 + 2, y, r, g, b);
   }
   if (integer != integer_old) {
     integer_old = integer;
-    set_number_fast_narrow_sgp30(integer, x + symbol_len * 3 + 2, y, 255, 255, 255);
+    set_number_fast_narrow_sgp30(integer, x + symbol_len * 3 + 2, y, r, g, b);
   }
 }
 void set_char(const char text, const uint8_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
@@ -1595,7 +1648,7 @@ void fire_vertical_advanced() {
   static uint8_t heat[41][14];  // [y][x]
   static float sparks_y[14];    // высота огоньков/искорок для каждого x
   static uint32_t last_ms = 0;
-  if (millis() - last_ms < 35) return;  // ~28 FPS
+  if (millis() - last_ms < 45) return;  // ~28 FPS
   last_ms = millis();
 
   // 1. Cooling + мягкое мерцание
@@ -1673,10 +1726,10 @@ void fire_vertical_advanced() {
 void snake_rgb_hunter() {
   const uint8_t W = 14;
   const uint8_t H = 41;
-  const uint8_t MAX_LEN = 55;
+  const uint8_t MAX_LEN = 65;
 
   static uint32_t last_ms = 0;
-  if (millis() - last_ms < 75) return;
+  if (millis() - last_ms < 105) return;
   last_ms = millis();
 
   // -------- состояние --------
@@ -1855,7 +1908,7 @@ void rain_on_window() {
   const uint8_t MAX_DROPS = 25;
 
   static uint32_t last_ms = 0;
-  if (millis() - last_ms < 90) return;  // медленное обновление
+  if (millis() - last_ms < 110) return;  // медленное обновление
   last_ms = millis();
 
   struct Drop {
