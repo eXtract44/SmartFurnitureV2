@@ -1182,13 +1182,14 @@ long get_gmt_offset() {
   return gmtOffset_sec;
 }
 void ini_time() {
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org");
+  //configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 void read_time() {
   getLocalTime(&timeinfo);
 }
 uint8_t get_hour() {
-  return timeinfo.tm_hour + isSummerTime();
+  return timeinfo.tm_hour ;//+ isSummerTime();
 }
 uint8_t get_min() {
   return timeinfo.tm_min;
